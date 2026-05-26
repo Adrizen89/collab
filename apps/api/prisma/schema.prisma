@@ -1,0 +1,89 @@
+// SOURCE DE VÉRITÉ du modèle de données (cf. CLAUDE.md §5).
+// Toute modification ici doit être migrée (`npm run db:migrate`) et annoncée à l'équipe.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  MEMBER
+  ADMIN
+}
+
+enum DocumentType {
+  TEXT // document texte édité en temps réel (état Yjs dans `content`)
+  FILE // fichier non textuel (PDF, image…) référencé par `fileUrl`
+  FOLDER // dossier de l'arborescence
+}
+
+model User {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  passwordHash     String
+  displayName      String
+  role             UserRole @default(MEMBER)
+  isBlocked        Boolean  @default(false)
+  twoFactorSecret  String? // secret TOTP base32, nullable
+  twoFactorEnabled Boolean  @default(false)
+  createdAt        DateTime @default(now())
+
+  ownedDocuments    Document[]       @relation("DocumentOwner")
+  modifiedDocuments Document[]       @relation("DocumentLastModifier")
+  invites           DocumentInvite[]
+  refreshTokens     RefreshToken[]
+}
+
+model Document {
+  id               String       @id @default(cuid())
+  name             String
+  type             DocumentType
+  // Arborescence auto-référencée : parentId null = racine.
+  parentId         String?
+  parent           Document?    @relation("DocumentTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children         Document[]   @relation("DocumentTree")
+  // État Yjs sérialisé (binaire) pour les documents TEXT.
+  content          Bytes?
+  // URL de stockage pour les FILE non textuels.
+  fileUrl          String?
+  ownerId          String
+  owner            User         @relation("DocumentOwner", fields: [ownerId], references: [id])
+  lastModifiedAt   DateTime     @default(now())
+  lastModifiedById String?
+  lastModifiedBy   User?        @relation("DocumentLastModifier", fields: [lastModifiedById], references: [id])
+  createdAt        DateTime     @default(now())
+
+  invites DocumentInvite[]
+
+  @@index([parentId])
+  @@index([ownerId])
+}
+
+model DocumentInvite {
+  id         String   @id @default(cuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([documentId, userId])
+  @@index([userId])
+}
+
+// Refresh tokens persistés pour permettre la révocation (logout) — exigence sécurité.
+model RefreshToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}

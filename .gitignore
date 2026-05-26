@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Prisma generated client (les migrations ET migration_lock.toml sont versionnés)
+apps/api/src/generated/
+
+# Env (jamais commité — exigence sécurité)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Uploads locaux (fichiers non textuels)
+apps/api/uploads/
+
+# Vite
+apps/web/dist/
+
+# Réglages Claude locaux (spécifiques à la machine)
+.claude/settings.local.json

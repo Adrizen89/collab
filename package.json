@@ -1,0 +1,29 @@
+{
+  "name": "collab-docs",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Application collaborative d'édition de documents en temps réel",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build:shared": "npm run build -w @collab/shared",
+    "dev:api": "npm run dev -w @collab/api",
+    "dev:realtime": "npm run dev -w @collab/realtime",
+    "dev:web": "npm run dev -w @collab/web",
+    "dev": "npm run build:shared && concurrently -n api,realtime,web -c blue,magenta,green \"npm:dev:api\" \"npm:dev:realtime\" \"npm:dev:web\"",
+    "build": "npm run build -w @collab/shared && npm run build -w @collab/api && npm run build -w @collab/realtime && npm run build -w @collab/web",
+    "db:migrate": "npm run db:migrate -w @collab/api",
+    "db:studio": "npm run db:studio -w @collab/api",
+    "db:seed": "npm run db:seed -w @collab/api",
+    "lint": "npm run lint -w @collab/api && npm run lint -w @collab/realtime && npm run lint -w @collab/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
