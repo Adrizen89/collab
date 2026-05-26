@@ -105,6 +105,8 @@ npm run dev:web          # le front reste lancé en local en dev
 | `npm run db:studio` | Ouvre Prisma Studio (inspection DB) |
 | `npm run lint` | Vérifie les types (tsc) des trois apps |
 | `npm run build` | Build de production de tout le monorepo |
+| `npm run test -w @collab/api` | Tests unitaires API (Vitest) |
+| `npm run test:e2e -w @collab/web` | Tests E2E navigateur (Playwright, stack lancé) |
 
 ## Variables d'environnement
 
@@ -131,11 +133,18 @@ Voir [`.env.example`](./.env.example) (commenté). Les secrets (`JWT_*`,
 7. (Optionnel) **Démarrer un appel audio** depuis le panneau dédié.
 8. **Administration** (admin uniquement) : créer un compte, bloquer / débloquer.
 
-## Tests automatisés ciblés
+## Tests automatisés
 
-Le parcours critique a été validé de bout en bout (auth + JWT/cookie, arborescence,
-autorisation par document, **synchro Yjs temps réel et persistance relue depuis la
-base**, blocage de compte). Voir la section *Sécurité* ci-dessous.
+- **Unitaires (Vitest, `apps/api`)** : hachage/vérification bcrypt, refus d'un compte
+  bloqué, autorisation par document (non-invité refusé), absence de fuite de secret,
+  round-trip de persistance Yjs. → `npm run test -w @collab/api`
+- **E2E (Playwright, `apps/web`)** : parcours nominal en navigateur (connexion →
+  création → ouverture de l'éditeur → synchro temps réel → saisie), et redirection du
+  visiteur non connecté. → `npm run test:e2e -w @collab/web` (stack de dev lancé).
+
+Le parcours critique a aussi été validé manuellement de bout en bout (synchro Yjs +
+persistance relue en base, invitation, blocage de compte, upload/téléchargement de
+fichier) et le **build Docker complet** (`docker compose up`) démarre les trois services.
 
 ---
 
@@ -166,11 +175,12 @@ métadonnées · édition temps réel + sauvegarde auto · reprise sans perte ap
 déconnexion · invitation d'une personne · suppression.
 
 **Secondaire** : administration (création/blocage de comptes — **fait**) · 2FA TOTP
-(**fait**) · modification de profil (**fait**) · appel audio WebRTC 1-à-1 (**fait**, isolé).
+(**fait**) · modification de profil (**fait**) · stockage/remplacement de fichiers non
+textuels PDF/image (**fait** : upload `multer`, limites taille + type MIME, stockage hors
+racine web, nom régénéré) · appel audio WebRTC 1-à-1 (**fait**, isolé).
 
 **Hors scope** (évolutions) : plusieurs invités dans un appel · curseurs distants affichés
-en continu · messagerie instantanée · stockage de fichiers non textuels (le modèle le
-prévoit — type `FILE` — mais l'upload n'est pas implémenté).
+en continu · messagerie instantanée.
 
 ## Structure
 
