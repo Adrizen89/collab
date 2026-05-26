@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { DocumentNode } from '@collab/shared';
 
@@ -7,6 +8,8 @@ interface TreeViewProps {
   onCreateChild: (parentId: string) => void;
   onRename: (node: DocumentNode) => void;
   onDelete: (node: DocumentNode) => void;
+  onUpload: (node: DocumentNode, file: File) => void;
+  onDownload: (node: DocumentNode) => void;
 }
 
 const TYPE_ICON: Record<DocumentNode['type'], string> = {
@@ -31,13 +34,22 @@ function TreeItem({
   onCreateChild,
   onRename,
   onDelete,
+  onUpload,
+  onDownload,
 }: { node: DocumentNode } & Omit<TreeViewProps, 'nodes'>) {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isShared = node.ownerId !== currentUserId;
   const canOpen = node.type === 'TEXT';
 
   const open = () => {
     if (canOpen) navigate(`/documents/${node.id}`);
+  };
+
+  const onFilePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) onUpload(node, file);
+    e.target.value = ''; // permet de re-sélectionner le même fichier
   };
 
   return (
@@ -63,6 +75,39 @@ function TreeItem({
               ＋
             </button>
           ) : null}
+          {node.type === 'FILE' ? (
+            <>
+              {node.fileUrl ? (
+                <button
+                  type="button"
+                  className="icon-btn"
+                  title="Télécharger"
+                  onClick={() => onDownload(node)}
+                >
+                  ⬇️
+                </button>
+              ) : null}
+              {!isShared ? (
+                <>
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    title={node.fileUrl ? 'Remplacer le fichier' : 'Téléverser un fichier'}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    ⬆️
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg,.gif,.webp"
+                    style={{ display: 'none' }}
+                    onChange={onFilePicked}
+                  />
+                </>
+              ) : null}
+            </>
+          ) : null}
           {!isShared ? (
             <>
               <button type="button" className="icon-btn" title="Renommer" onClick={() => onRename(node)}>
@@ -85,6 +130,8 @@ function TreeItem({
               onCreateChild={onCreateChild}
               onRename={onRename}
               onDelete={onDelete}
+              onUpload={onUpload}
+              onDownload={onDownload}
             />
           ))}
         </ul>

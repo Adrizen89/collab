@@ -25,7 +25,8 @@ export function toDocumentMeta(doc: DocumentWithModifier): DocumentMeta {
     name: doc.name,
     type: doc.type,
     parentId: doc.parentId,
-    fileUrl: doc.fileUrl,
+    // On expose une URL de téléchargement, jamais le nom de fichier interne.
+    fileUrl: doc.fileUrl ? `/documents/${doc.id}/file` : null,
     lastModifiedAt: doc.lastModifiedAt.toISOString(),
     lastModifiedBy: doc.lastModifiedBy
       ? { id: doc.lastModifiedBy.id, displayName: doc.lastModifiedBy.displayName }

@@ -64,6 +64,31 @@ export function DocumentsPage() {
     }
   };
 
+  const handleUpload = async (node: DocumentNode, file: File) => {
+    setError(null);
+    try {
+      await api.uploadFile(node.id, file);
+      await load();
+    } catch (err) {
+      setError(err instanceof ApiClientError ? err.message : 'Upload impossible');
+    }
+  };
+
+  const handleDownload = async (node: DocumentNode) => {
+    setError(null);
+    try {
+      const { blob, name } = await api.downloadFile(node.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof ApiClientError ? err.message : 'Téléchargement impossible');
+    }
+  };
+
   const handleDelete = async (node: DocumentNode) => {
     const sure = window.confirm(
       `Supprimer « ${node.name} »${node.type === 'FOLDER' ? ' et tout son contenu' : ''} ? Cette action est irréversible.`,
@@ -113,6 +138,7 @@ export function DocumentsPage() {
               onChange={(e) => setNewType(e.target.value as DocumentType)}
             >
               <option value="TEXT">Document texte</option>
+              <option value="FILE">Fichier (PDF, image)</option>
               <option value="FOLDER">Dossier</option>
             </select>
             <button type="submit" className="btn btn-sm">
@@ -137,6 +163,8 @@ export function DocumentsPage() {
             onCreateChild={startCreate}
             onRename={handleRename}
             onDelete={handleDelete}
+            onUpload={handleUpload}
+            onDownload={handleDownload}
           />
         )}
       </div>

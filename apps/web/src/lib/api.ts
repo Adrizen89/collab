@@ -192,6 +192,47 @@ export const api = {
   removeInvite: (id: string, inviteId: string) =>
     request<void>(`/documents/${id}/invites/${inviteId}`, { method: 'DELETE' }),
 
+  // Fichiers non textuels (FILE)
+  uploadFile: async (id: string, file: File): Promise<DocumentMeta> => {
+    const form = new FormData();
+    form.append('file', file);
+    const headers: Record<string, string> = {};
+    if (accessToken) headers.authorization = `Bearer ${accessToken}`;
+    const res = await fetch(`${config.apiUrl}/documents/${id}/file`, {
+      method: 'POST',
+      credentials: 'include',
+      headers, // pas de content-type : le navigateur pose la frontière multipart
+      body: form,
+    });
+    if (!res.ok) {
+      let message = 'Upload impossible';
+      try {
+        const err = (await res.json()) as { error?: string };
+        if (err.error) message = err.error;
+      } catch {
+        /* ignore */
+      }
+      throw new ApiClientError(message, res.status);
+    }
+    return (await res.json()) as DocumentMeta;
+  },
+  downloadFile: async (id: string): Promise<{ blob: Blob; name: string }> => {
+    const headers: Record<string, string> = {};
+    if (accessToken) headers.authorization = `Bearer ${accessToken}`;
+    const res = await fetch(`${config.apiUrl}/documents/${id}/file`, {
+      credentials: 'include',
+      headers,
+    });
+    if (!res.ok) {
+      throw new ApiClientError('Téléchargement impossible', res.status);
+    }
+    const blob = await res.blob();
+    const disposition = res.headers.get('content-disposition') ?? '';
+    const match = /filename="?([^"]+)"?/.exec(disposition);
+    const name = match ? decodeURIComponent(match[1]) : 'fichier';
+    return { blob, name };
+  },
+
   // Administration
   adminUsers: () => request<PublicUser[]>('/admin/users'),
   adminCreateUser: (body: CreateUserRequest) =>

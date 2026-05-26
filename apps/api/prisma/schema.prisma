@@ -48,8 +48,11 @@ model Document {
   children         Document[]   @relation("DocumentTree")
   // État Yjs sérialisé (binaire) pour les documents TEXT.
   content          Bytes?
-  // URL de stockage pour les FILE non textuels.
+  // Pour les FILE non textuels : nom de fichier stocké (régénéré, interne),
+  // type MIME et nom d'origine (pour le téléchargement).
   fileUrl          String?
+  fileMimeType     String?
+  fileName         String?
   ownerId          String
   owner            User         @relation("DocumentOwner", fields: [ownerId], references: [id])
   lastModifiedAt   DateTime     @default(now())

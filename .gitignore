@@ -31,3 +31,8 @@ apps/web/dist/
 
 # Réglages Claude locaux (spécifiques à la machine)
 .claude/settings.local.json
+
+# Playwright (artefacts de test)
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/.playwright/

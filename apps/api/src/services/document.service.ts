@@ -1,3 +1,5 @@
+import path from 'node:path';
+import fs from 'node:fs/promises';
 import type { Document } from '@prisma/client';
 import type {
   CreateDocumentRequest,
@@ -9,6 +11,7 @@ import type {
 } from '@collab/shared';
 import { prisma } from '../lib/prisma.js';
 import { toDocumentMeta, toPublicUser } from '../lib/mappers.js';
+import { UPLOADS_DIR } from '../lib/uploads.js';
 import { badRequest, conflict, forbidden, notFound } from '../lib/errors.js';
 
 // Sélection commune incluant l'auteur de la dernière modification (léger).
@@ -183,7 +186,65 @@ export async function deleteDocument(
   if (doc.ownerId !== userId && role !== 'ADMIN') {
     throw forbidden('Seul le propriétaire ou un administrateur peut supprimer');
   }
+  // Nettoyage best-effort du fichier sur disque si c'est un FILE.
+  if (doc.type === 'FILE' && doc.fileUrl) {
+    await fs.unlink(path.join(UPLOADS_DIR, doc.fileUrl)).catch(() => undefined);
+  }
   await prisma.document.delete({ where: { id: documentId } });
+}
+
+// ─────────────────────────────────────────────────────────────
+// Fichiers non textuels (FILE)
+// ─────────────────────────────────────────────────────────────
+
+interface UploadedFile {
+  filename: string; // nom régénéré sur disque
+  mimetype: string;
+  originalname: string;
+}
+
+/** Attache (ou remplace) le fichier d'un document FILE. Propriétaire uniquement. */
+export async function attachFile(
+  userId: string,
+  documentId: string,
+  file: UploadedFile,
+): Promise<DocumentMeta> {
+  const doc = await assertOwner(userId, documentId);
+  if (doc.type !== 'FILE') {
+    throw badRequest('Ce document n\'est pas de type fichier');
+  }
+  // Remplacement : supprimer l'ancien fichier physique.
+  if (doc.fileUrl) {
+    await fs.unlink(path.join(UPLOADS_DIR, doc.fileUrl)).catch(() => undefined);
+  }
+  const updated = await prisma.document.update({
+    where: { id: documentId },
+    data: {
+      fileUrl: file.filename,
+      fileMimeType: file.mimetype,
+      fileName: file.originalname,
+      lastModifiedById: userId,
+      lastModifiedAt: new Date(),
+    },
+    include: { lastModifiedBy: modifierSelect },
+  });
+  return toDocumentMeta(updated);
+}
+
+/** Renvoie le chemin disque + métadonnées d'un fichier. Accès propriétaire ou invité. */
+export async function getFile(
+  userId: string,
+  documentId: string,
+): Promise<{ path: string; mime: string; name: string }> {
+  const doc = await assertCanAccess(userId, documentId);
+  if (doc.type !== 'FILE' || !doc.fileUrl) {
+    throw notFound('Aucun fichier attaché à ce document');
+  }
+  return {
+    path: path.join(UPLOADS_DIR, doc.fileUrl),
+    mime: doc.fileMimeType ?? 'application/octet-stream',
+    name: doc.fileName ?? doc.name,
+  };
 }
 
 /** Contenu d'un document (état Yjs encodé base64). Accès propriétaire ou invité. */

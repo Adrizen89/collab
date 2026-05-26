@@ -1,9 +1,12 @@
+import { createReadStream } from 'node:fs';
 import { Router } from 'express';
 import { z } from 'zod';
 import { DOCUMENT_NAME_MAX_LENGTH } from '@collab/shared';
 import { requireAuth } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
 import { asyncHandler } from '../middleware/error.js';
+import { handleUpload } from '../lib/uploads.js';
+import { badRequest } from '../lib/errors.js';
 import {
   listTree,
   createDocument,
@@ -13,6 +16,8 @@ import {
   inviteUser,
   listInvites,
   removeInvite,
+  attachFile,
+  getFile,
 } from '../services/document.service.js';
 
 export const documentRouter = Router();
@@ -71,6 +76,32 @@ documentRouter.delete(
   asyncHandler(async (req, res) => {
     await deleteDocument(req.auth!.sub, req.auth!.role, req.params.id);
     res.status(204).end();
+  }),
+);
+
+// ── Fichiers non textuels (FILE) ──
+documentRouter.post(
+  '/:id/file',
+  handleUpload,
+  asyncHandler(async (req, res) => {
+    if (!req.file) {
+      throw badRequest('Aucun fichier reçu');
+    }
+    const meta = await attachFile(req.auth!.sub, req.params.id, req.file);
+    res.status(201).json(meta);
+  }),
+);
+
+documentRouter.get(
+  '/:id/file',
+  asyncHandler(async (req, res) => {
+    const file = await getFile(req.auth!.sub, req.params.id);
+    res.setHeader('Content-Type', file.mime);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${encodeURIComponent(file.name)}"`,
+    );
+    createReadStream(file.path).pipe(res);
   }),
 );
 
