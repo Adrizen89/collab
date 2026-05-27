@@ -4,8 +4,6 @@ import { config as loadEnv } from 'dotenv';
 import { z } from 'zod';
 
 // Charge le `.env` à la racine du monorepo (3 niveaux au-dessus de src/ ou dist/).
-// En conteneur, les variables sont injectées par docker-compose : le fichier
-// est absent et dotenv l'ignore silencieusement.
 const rootEnv = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../.env');
 loadEnv({ path: rootEnv });
 

@@ -15,7 +15,6 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({ origin: env.WEB_ORIGIN, credentials: true }));
-// Limite généreuse : l'état Yjs sérialisé (route interne) peut être volumineux.
 app.use(express.json({ limit: '5mb' }));
 app.use(cookieParser());
 

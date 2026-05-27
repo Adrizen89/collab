@@ -30,7 +30,6 @@ export async function login(
 ): Promise<LoginResult> {
   const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
 
-  // Même message que mot de passe faux : ne révèle pas si l'email existe.
   if (!user) {
     throw unauthorized('Identifiants invalides');
   }

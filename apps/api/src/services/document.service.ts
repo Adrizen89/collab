@@ -14,12 +14,7 @@ import { toDocumentMeta, toPublicUser } from '../lib/mappers.js';
 import { UPLOADS_DIR } from '../lib/uploads.js';
 import { badRequest, conflict, forbidden, notFound } from '../lib/errors.js';
 
-// Sélection commune incluant l'auteur de la dernière modification (léger).
 const modifierSelect = { select: { id: true, displayName: true } } as const;
-
-// ─────────────────────────────────────────────────────────────
-// Autorisation (toujours vérifiée côté serveur, jamais d'après l'UI)
-// ─────────────────────────────────────────────────────────────
 
 /** Renvoie le document si l'utilisateur peut le VOIR/ÉDITER (propriétaire ou invité). */
 async function assertCanAccess(userId: string, documentId: string): Promise<Document> {
@@ -69,10 +64,6 @@ async function assertOwner(userId: string, documentId: string): Promise<Document
   return doc;
 }
 
-// ─────────────────────────────────────────────────────────────
-// Arborescence
-// ─────────────────────────────────────────────────────────────
-
 /** Tri : dossiers d'abord, puis ordre alphabétique insensible à la casse. */
 function sortNodes(nodes: DocumentNode[]): void {
   nodes.sort((a, b) => {
@@ -115,7 +106,6 @@ export async function listTree(userId: string): Promise<DocumentNode[]> {
     }
   }
 
-  // Les documents partagés apparaissent comme racines pour l'invité.
   for (const doc of shared) {
     roots.push({ ...toDocumentMeta(doc), children: [] });
   }
@@ -123,10 +113,6 @@ export async function listTree(userId: string): Promise<DocumentNode[]> {
   sortNodes(roots);
   return roots;
 }
-
-// ─────────────────────────────────────────────────────────────
-// CRUD
-// ─────────────────────────────────────────────────────────────
 
 export async function createDocument(
   userId: string,
@@ -193,12 +179,9 @@ export async function deleteDocument(
   await prisma.document.delete({ where: { id: documentId } });
 }
 
-// ─────────────────────────────────────────────────────────────
-// Fichiers non textuels (FILE)
-// ─────────────────────────────────────────────────────────────
 
 interface UploadedFile {
-  filename: string; // nom régénéré sur disque
+  filename: string;
   mimetype: string;
   originalname: string;
 }
@@ -263,10 +246,6 @@ export async function getDocumentContent(
   };
 }
 
-// ─────────────────────────────────────────────────────────────
-// Persistance Yjs (appelée par le serveur Realtime via la route interne)
-// ─────────────────────────────────────────────────────────────
-
 /** Sauvegarde l'état Yjs binaire et met à jour les métadonnées de dernière modification. */
 export async function saveYjsState(
   documentId: string,
@@ -296,10 +275,6 @@ export async function loadYjsState(documentId: string): Promise<Buffer | null> {
   }
   return doc.content ? Buffer.from(doc.content) : null;
 }
-
-// ─────────────────────────────────────────────────────────────
-// Invitations
-// ─────────────────────────────────────────────────────────────
 
 export async function inviteUser(
   ownerId: string,

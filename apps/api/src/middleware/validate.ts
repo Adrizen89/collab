@@ -3,8 +3,7 @@ import { ZodError, type ZodSchema } from 'zod';
 import { badRequest } from '../lib/errors.js';
 
 /**
- * Valide et type le corps de requête via un schéma Zod : on ne fait jamais
- * confiance au client. Remplace req.body par la version validée.
+ * Valide et type le corps de requête via un schéma Zod
  */
 export function validateBody<T>(schema: ZodSchema<T>) {
   return (req: Request, _res: Response, next: NextFunction): void => {

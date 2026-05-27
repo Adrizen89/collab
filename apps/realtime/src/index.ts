@@ -29,8 +29,6 @@ interface ParsedUpgrade {
 
 function parseUpgrade(req: IncomingMessage): ParsedUpgrade {
   const url = new URL(req.url ?? '/', 'http://localhost');
-  // Token transmis via sous-protocole WS (évite de le mettre dans l'URL).
-  // Fallback query `?token=` toléré pour le débogage local.
   const proto = req.headers['sec-websocket-protocol'];
   let token: string | null = null;
   if (typeof proto === 'string' && proto.length > 0) {
@@ -72,7 +70,6 @@ server.on('upgrade', (req: IncomingMessage, socket: Duplex, head: Buffer) => {
         return;
       }
 
-      // Autorisation vérifiée serveur : pas de room sans accès.
       const allowed = await userCanAccess(payload.sub, docId);
       if (!allowed) {
         reject(socket, 403);
@@ -80,7 +77,7 @@ server.on('upgrade', (req: IncomingMessage, socket: Duplex, head: Buffer) => {
       }
 
       if (yjsMatch) {
-        const room = await getRoom(docId); // charge l'état avant d'accepter la connexion
+        const room = await getRoom(docId);
         yjsWss.handleUpgrade(req, socket, head, (ws) => {
           handleConnection(ws, room, payload.sub);
         });

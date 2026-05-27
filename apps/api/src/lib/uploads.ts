@@ -6,8 +6,7 @@ import type { NextFunction, Request, Response } from 'express';
 import multer from 'multer';
 import { badRequest } from './errors.js';
 
-// Dossier de stockage hors de la racine web, résolu de façon stable que l'on
-// tourne depuis src/ (tsx) ou dist/ (build).
+// Dossier de stockage HORS de la racine web
 export const UPLOADS_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '../../uploads',

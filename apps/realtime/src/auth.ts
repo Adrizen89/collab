@@ -22,7 +22,6 @@ export function verifyToken(token: string): AccessTokenPayload | null {
 
 /**
  * Demande à l'API si l'utilisateur a accès au document.
- * La séparation des serveurs interdit l'accès direct à la DB ici.
  */
 export async function userCanAccess(userId: string, documentId: string): Promise<boolean> {
   try {
@@ -34,7 +33,7 @@ export async function userCanAccess(userId: string, documentId: string): Promise
       return false;
     }
     const data = (await res.json()) as { allowed: boolean };
-    return data.allowed === true;
+    return data.allowed;
   } catch (err) {
     logger.error('Vérification d\'accès impossible (API injoignable ?)', err);
     return false;

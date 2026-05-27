@@ -1,5 +1,4 @@
-// Source de vérité du modèle de données.
-// Toute modification ici doit être migrée (`npm run db:migrate`) et annoncée à l'équipe.
+// Toute modification ici doit être migrée (`npm run db:migrate`).
 
 generator client {
   provider = "prisma-client-js"
@@ -16,9 +15,9 @@ enum UserRole {
 }
 
 enum DocumentType {
-  TEXT // document texte édité en temps réel (état Yjs dans `content`)
-  FILE // fichier non textuel (PDF, image…) référencé par `fileUrl`
-  FOLDER // dossier de l'arborescence
+  TEXT
+  FILE
+  FOLDER
 }
 
 model User {
@@ -28,7 +27,7 @@ model User {
   displayName      String
   role             UserRole @default(MEMBER)
   isBlocked        Boolean  @default(false)
-  twoFactorSecret  String? // secret TOTP base32, nullable
+  twoFactorSecret  String?
   twoFactorEnabled Boolean  @default(false)
   createdAt        DateTime @default(now())
 
@@ -42,14 +41,10 @@ model Document {
   id               String       @id @default(cuid())
   name             String
   type             DocumentType
-  // Arborescence auto-référencée : parentId null = racine.
   parentId         String?
   parent           Document?    @relation("DocumentTree", fields: [parentId], references: [id], onDelete: Cascade)
   children         Document[]   @relation("DocumentTree")
-  // État Yjs sérialisé (binaire) pour les documents TEXT.
   content          Bytes?
-  // Pour les FILE non textuels : nom de fichier stocké (régénéré, interne),
-  // type MIME et nom d'origine (pour le téléchargement).
   fileUrl          String?
   fileMimeType     String?
   fileName         String?
@@ -78,7 +73,7 @@ model DocumentInvite {
   @@index([userId])
 }
 
-// Refresh tokens persistés pour permettre la révocation (logout) — exigence sécurité.
+// Refresh tokens persistés pour permettre la révocation (logout)
 model RefreshToken {
   id        String    @id @default(cuid())
   token     String    @unique
