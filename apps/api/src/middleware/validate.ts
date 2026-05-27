@@ -3,9 +3,8 @@ import { ZodError, type ZodSchema } from 'zod';
 import { badRequest } from '../lib/errors.js';
 
 /**
- * Valide et type le corps de requête via un schéma Zod (cf. CLAUDE.md §9 :
- * « valider et typer toutes les entrées côté serveur »).
- * Remplace req.body par la version validée/typée.
+ * Valide et type le corps de requête via un schéma Zod : on ne fait jamais
+ * confiance au client. Remplace req.body par la version validée.
  */
 export function validateBody<T>(schema: ZodSchema<T>) {
   return (req: Request, _res: Response, next: NextFunction): void => {

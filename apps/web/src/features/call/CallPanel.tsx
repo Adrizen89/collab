@@ -5,9 +5,9 @@ import { getAccessToken } from '../../lib/api';
 import { useAuth } from '../../auth/AuthContext';
 
 /**
- * Appel audio WebRTC 1-à-1 (SECONDAIRE — isolé du cœur, CLAUDE.md §12).
- * Le canal de signalisation (offre/réponse/ICE) passe par le serveur Realtime.
- * Si cette brique échoue, l'édition collaborative continue normalement.
+ * Appel audio WebRTC 1-à-1. Le canal de signalisation (offre/réponse/ICE) passe
+ * par le serveur Realtime. Isolé : si cette brique échoue, l'édition collaborative
+ * continue normalement.
  */
 
 type Phase = 'idle' | 'calling' | 'incoming' | 'in-call';

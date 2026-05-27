@@ -48,7 +48,7 @@ export async function updateProfile(
   return toPublicUser(updated);
 }
 
-/** Crée un compte (réservé ADMIN — pas d'inscription publique, CLAUDE.md §6). */
+/** Crée un compte (réservé ADMIN — pas d'inscription publique). */
 export async function createUser(input: CreateUserRequest): Promise<PublicUser> {
   const email = input.email.toLowerCase();
   const existing = await prisma.user.findUnique({ where: { email } });

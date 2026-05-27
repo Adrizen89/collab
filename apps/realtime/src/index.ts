@@ -29,7 +29,7 @@ interface ParsedUpgrade {
 
 function parseUpgrade(req: IncomingMessage): ParsedUpgrade {
   const url = new URL(req.url ?? '/', 'http://localhost');
-  // Token transmis via sous-protocole WS (évite de le mettre dans l'URL, CLAUDE.md §9).
+  // Token transmis via sous-protocole WS (évite de le mettre dans l'URL).
   // Fallback query `?token=` toléré pour le débogage local.
   const proto = req.headers['sec-websocket-protocol'];
   let token: string | null = null;
@@ -72,7 +72,7 @@ server.on('upgrade', (req: IncomingMessage, socket: Duplex, head: Buffer) => {
         return;
       }
 
-      // Autorisation vérifiée serveur : pas de room sans accès (CLAUDE.md §9).
+      // Autorisation vérifiée serveur : pas de room sans accès.
       const allowed = await userCanAccess(payload.sub, docId);
       if (!allowed) {
         reject(socket, 403);

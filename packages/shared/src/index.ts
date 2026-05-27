@@ -1,7 +1,7 @@
 /**
  * Contrat de types partagé entre l'API, le serveur Realtime et le front.
- * SOURCE DE VÉRITÉ unique des structures échangées (cf. CLAUDE.md §7).
- * Toute évolution d'un type ici doit être annoncée à l'équipe.
+ * Source de vérité unique des structures échangées : toute évolution d'un type
+ * ici doit être annoncée à l'équipe.
  */
 
 // ─────────────────────────────────────────────────────────────
@@ -153,7 +153,7 @@ export interface TwoFactorVerifyRequest {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Réponses d'erreur — forme unique (cf. CLAUDE.md §7)
+// Réponses d'erreur — forme unique
 // ─────────────────────────────────────────────────────────────
 
 export interface ApiError {

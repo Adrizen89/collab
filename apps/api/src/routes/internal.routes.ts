@@ -10,7 +10,7 @@ import { loadYjsState, saveYjsState, userCanAccess } from '../services/document.
 export const internalRouter = Router();
 
 /**
- * Authentifie les appels Realtime → API par un secret partagé (CLAUDE.md §3).
+ * Authentifie les appels Realtime → API par un secret partagé.
  * Ce routeur n'est jamais exposé au client final.
  */
 function requireInternalSecret(req: Request, _res: Response, next: NextFunction): void {

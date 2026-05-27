@@ -1,5 +1,5 @@
-// Erreur HTTP métier : le middleware d'erreur la transforme en réponse
-// `{ error }` propre avec le bon code (cf. CLAUDE.md §7).
+// Erreur HTTP métier : le middleware d'erreur la transforme en réponse `{ error }`
+// avec le bon code de statut.
 export class HttpError extends Error {
   constructor(
     public readonly status: number,

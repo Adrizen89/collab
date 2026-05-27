@@ -1,4 +1,4 @@
-// SOURCE DE VÉRITÉ du modèle de données (cf. CLAUDE.md §5).
+// Source de vérité du modèle de données.
 // Toute modification ici doit être migrée (`npm run db:migrate`) et annoncée à l'équipe.
 
 generator client {

@@ -1,5 +1,5 @@
 // Crée l'administrateur initial. Idempotent : ne fait rien si l'admin existe déjà.
-// Pas d'inscription publique (CLAUDE.md §6) → l'admin de départ est créé ici.
+// (Pas d'inscription publique : c'est le seul moyen d'obtenir un premier compte.)
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 

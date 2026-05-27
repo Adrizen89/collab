@@ -2,9 +2,9 @@ import { WebSocket } from 'ws';
 import { logger } from './logger.js';
 
 /**
- * Signalisation WebRTC (audio — SECONDAIRE, isolé du chemin critique, CLAUDE.md §12).
- * Simple relais des messages SDP / ICE entre pairs d'un même document.
- * Si cette brique échoue, la synchro Yjs continue de fonctionner.
+ * Signalisation WebRTC (audio) : simple relais des messages SDP / ICE entre
+ * pairs d'un même document. Isolée du chemin critique — si cette brique échoue,
+ * la synchro Yjs continue de fonctionner.
  */
 const signalRooms = new Map<string, Set<WebSocket>>();
 

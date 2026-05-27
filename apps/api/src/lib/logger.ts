@@ -1,5 +1,4 @@
-// Logger minimal : on évite les `console.log` dispersés (cf. CLAUDE.md §7).
-// Volontairement simple pour un projet de 5 jours.
+// Logger minimal et centralisé, pour éviter les `console.log` dispersés.
 
 type Level = 'info' | 'warn' | 'error';
 

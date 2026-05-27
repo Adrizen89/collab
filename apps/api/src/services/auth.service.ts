@@ -40,7 +40,7 @@ export async function login(
     throw unauthorized('Identifiants invalides');
   }
 
-  // Invariant CLAUDE.md §6 : un compte bloqué ne peut pas se connecter.
+  // Un compte bloqué ne peut pas se connecter.
   if (user.isBlocked) {
     throw unauthorized('Ce compte est bloqué. Contactez un administrateur.');
   }

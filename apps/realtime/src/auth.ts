@@ -22,7 +22,7 @@ export function verifyToken(token: string): AccessTokenPayload | null {
 
 /**
  * Demande à l'API si l'utilisateur a accès au document.
- * La séparation des serveurs (CLAUDE.md §3) interdit l'accès direct à la DB ici.
+ * La séparation des serveurs interdit l'accès direct à la DB ici.
  */
 export async function userCanAccess(userId: string, documentId: string): Promise<boolean> {
   try {

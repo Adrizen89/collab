@@ -14,7 +14,7 @@ export function App() {
     return <div className="screen-center">Chargement…</div>;
   }
 
-  // Visiteur non connecté : uniquement le formulaire de connexion (CLAUDE.md §1).
+  // Visiteur non connecté : uniquement le formulaire de connexion.
   if (!user) {
     return (
       <Routes>

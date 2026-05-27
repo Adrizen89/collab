@@ -18,7 +18,7 @@ import { badRequest, conflict, forbidden, notFound } from '../lib/errors.js';
 const modifierSelect = { select: { id: true, displayName: true } } as const;
 
 // ─────────────────────────────────────────────────────────────
-// Autorisation (toujours vérifiée côté serveur — CLAUDE.md §9)
+// Autorisation (toujours vérifiée côté serveur, jamais d'après l'UI)
 // ─────────────────────────────────────────────────────────────
 
 /** Renvoie le document si l'utilisateur peut le VOIR/ÉDITER (propriétaire ou invité). */
@@ -173,7 +173,7 @@ export async function renameDocument(
   return toDocumentMeta(doc);
 }
 
-/** Suppression : propriétaire OU administrateur (CLAUDE.md §6). Cascade sur enfants + invitations. */
+/** Suppression : propriétaire ou administrateur. Cascade sur enfants + invitations. */
 export async function deleteDocument(
   userId: string,
   role: UserRole,
@@ -267,10 +267,7 @@ export async function getDocumentContent(
 // Persistance Yjs (appelée par le serveur Realtime via la route interne)
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Sauvegarde l'état Yjs binaire d'un document et met à jour les métadonnées
- * de dernière modification (invariant CLAUDE.md §6).
- */
+/** Sauvegarde l'état Yjs binaire et met à jour les métadonnées de dernière modification. */
 export async function saveYjsState(
   documentId: string,
   base64State: string,

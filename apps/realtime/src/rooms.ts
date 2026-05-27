@@ -189,7 +189,7 @@ async function persistRoom(room: Room): Promise<void> {
     room.dirty = false;
     logger.info(`État persisté : ${room.docId}`);
   } catch (err) {
-    // On garde dirty=true : nouvel essai au prochain cycle (anti-perte, CLAUDE.md §12).
+    // On garde dirty=true : nouvel essai au prochain cycle (anti-perte de données).
     logger.error(`Persistance ${room.docId} échouée`, err);
   }
 }

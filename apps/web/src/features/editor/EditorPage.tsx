@@ -63,7 +63,7 @@ export function EditorPage() {
         const ytext = ydoc.getText('codemirror');
 
         // Persistance locale : les éditions survivent à une déconnexion et
-        // resynchronisent à la reconnexion (exigence cœur CLAUDE.md §1).
+        // resynchronisent à la reconnexion (pas de perte de données).
         idb = new IndexeddbPersistence(`collabdocs-${id}`, ydoc);
 
         const token = getAccessToken() ?? '';
