@@ -101,7 +101,11 @@ documentRouter.get(
       'Content-Disposition',
       `attachment; filename="${encodeURIComponent(file.name)}"`,
     );
-    createReadStream(file.path).pipe(res);
+    if (file.isText && file.content) {
+      res.send(file.content);
+    } else if (file.path) {
+      createReadStream(file.path).pipe(res);
+    }
   }),
 );
 

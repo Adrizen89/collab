@@ -227,9 +227,9 @@ export const api = {
       throw new ApiClientError('Téléchargement impossible', res.status);
     }
     const blob = await res.blob();
-    const disposition = res.headers.get('content-disposition') ?? '';
-    const match = /filename="?([^"]+)"?/.exec(disposition);
-    const name = match ? decodeURIComponent(match[1]) : 'fichier';
+    const disposition = res.headers.get('content-disposition') ?? res.headers.get('Content-Disposition') ?? '';
+    const match = /filename="([^"]+)"/.exec(disposition);
+    const name = match ? match[1] : 'fichier';
     return { blob, name };
   },
 

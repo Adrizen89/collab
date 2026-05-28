@@ -1,5 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import * as Y from 'yjs';
 import type { Document } from '@prisma/client';
 import type {
   CreateDocumentRequest,
@@ -15,6 +16,13 @@ import { UPLOADS_DIR } from '../lib/uploads.js';
 import { badRequest, conflict, forbidden, notFound } from '../lib/errors.js';
 
 const modifierSelect = { select: { id: true, displayName: true } } as const;
+
+function decodeYjsToText(buffer: Buffer | Uint8Array): string {
+  const ydoc = new Y.Doc();
+  Y.applyUpdate(ydoc, new Uint8Array(buffer));
+  const ytext = ydoc.getText('codemirror');
+  return ytext.toString();
+}
 
 /** Renvoie le document si l'utilisateur peut le VOIR/ÉDITER (propriétaire ou invité). */
 async function assertCanAccess(userId: string, documentId: string): Promise<Document> {
@@ -214,12 +222,29 @@ export async function attachFile(
   return toDocumentMeta(updated);
 }
 
+interface FileInfo {
+  path?: string;
+  mime: string;
+  name: string;
+  content?: Buffer;
+  isText?: boolean;
+}
+
 /** Renvoie le chemin disque + métadonnées d'un fichier. Accès propriétaire ou invité. */
 export async function getFile(
   userId: string,
   documentId: string,
-): Promise<{ path: string; mime: string; name: string }> {
+): Promise<FileInfo> {
   const doc = await assertCanAccess(userId, documentId);
+  if (doc.type === 'TEXT') {
+    const text = doc.content ? decodeYjsToText(doc.content) : '';
+    return {
+      mime: 'text/plain',
+      name: `${doc.name}.txt`,
+      content: Buffer.from(text, 'utf-8'),
+      isText: true,
+    };
+  }
   if (doc.type !== 'FILE' || !doc.fileUrl) {
     throw notFound('Aucun fichier attaché à ce document');
   }

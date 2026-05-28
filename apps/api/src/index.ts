@@ -14,7 +14,13 @@ import { errorHandler, notFoundHandler } from './middleware/error.js';
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: env.WEB_ORIGIN, credentials: true }));
+app.use(
+  cors({
+    origin: env.WEB_ORIGIN,
+    credentials: true,
+    exposedHeaders: ['content-disposition'],
+  }),
+);
 app.use(express.json({ limit: '5mb' }));
 app.use(cookieParser());
 

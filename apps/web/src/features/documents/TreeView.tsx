@@ -75,6 +75,16 @@ function TreeItem({
               ＋
             </button>
           ) : null}
+          {node.type === 'TEXT' ? (
+            <button
+              type="button"
+              className="icon-btn"
+              title="Télécharger"
+              onClick={() => onDownload(node)}
+            >
+              ⬇️
+            </button>
+          ) : null}
           {node.type === 'FILE' ? (
             <>
               {node.fileUrl ? (
@@ -100,7 +110,7 @@ function TreeItem({
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".pdf,.png,.jpg,.jpeg,.gif,.webp"
+                    accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.txt"
                     style={{ display: 'none' }}
                     onChange={onFilePicked}
                   />
